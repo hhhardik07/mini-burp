@@ -1,7 +1,10 @@
 #include <stdio.h>
 
+
+ #include "server.h"
+
 int main()
 {
-    printf("Mini Burp Starting...\n");
+   start_server();
     return 0;
 }

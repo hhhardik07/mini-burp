@@ -1,8 +1,8 @@
 CC=gcc
 
-CFLAGS=-Wall -Wextra -g
+CFLAGS=-Wall -Wextra -g -Iinclude #tells gcc where header are 
 
-SRC=src/main.c
+SRC=src/main.c src/server.c
 
 TARGET=mini-burp
 
