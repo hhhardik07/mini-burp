@@ -127,6 +127,64 @@ int target_server_fd;
 
 target_server_fd =
     connect_to_target_server(host);
+    // forwarding the browser requst to the website since after cpnnexipm thsi file owns bothr the browser fd and the target server fd 
+ssize_t bytes_sent;
+
+bytes_sent = write(
+    target_server_fd,
+    buffer,
+    bytes_read
+);
+
+if (bytes_sent < 0)
+{
+    perror("write");
+
+    close(target_server_fd);
+    close(browser_fd);
+    close(listen_from_browser_fd);
+
+    return;
+}
+
+printf("Request forwarded\n");
+
+
+char response[8192];
+ssize_t response_bytes;
+
+
+response_bytes = read(
+    target_server_fd,
+    response,
+    sizeof(response) - 1
+);
+if (response_bytes < 0)
+{
+    perror("read");
+
+    close(target_server_fd);
+    close(browser_fd);
+    close(listen_from_browser_fd);
+
+    return;
+}
+
+  response[response_bytes] = '\0';
+  
+  
+  
+  
+  printf("\nRESPONSE\n");
+printf("%s\n", response);
+printf(".....\n");
+
+
+write(
+    browser_fd,
+    response,
+    response_bytes
+); //
 
 if (target_server_fd < 0)
 {
