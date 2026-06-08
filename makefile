@@ -2,7 +2,7 @@ CC=gcc
 
 CFLAGS=-Wall -Wextra -g -Iinclude
 
-SRC=src/main.c src/server.c
+SRC=src/main.c src/server.c src/client.c
 
 TARGET=mini-burp
 

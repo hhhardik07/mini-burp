@@ -1,10 +1,12 @@
+#include <unistd.h>
 #include <stdio.h>
 
+#include "server.h"
 
- #include "server.h"
-
-int main()
+int main(void)
 {
-   start_server();
+    start_server();
+
     return 0;
 }
+

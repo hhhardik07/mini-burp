@@ -34,7 +34,15 @@ memset(&hints, 0, sizeof(hints));
       
       // now creating socket 
       
-target_server_fd = socket(
+      
+      
+      
+ /* opwning up a new sockert since qe now have the info about the host and we need tp connect to it after which we will get a new fd that we will return to the server */   
+ 
+ 
+ 
+ 
+target_server_fd = socket( 
    result->ai_family,
  result->ai_socktype,
   result->ai_protocol
