@@ -12,18 +12,18 @@
 
 void start_server(void)
 {
-    int server_fd;
+    int listen_from_browser_fd;
     char buffer[4096];
 ssize_t bytes_read;
 
     struct sockaddr_in server_addr;
-    int client_fd;
+    int browser_fd;;
 struct sockaddr_in client_addr;
 socklen_t client_len = sizeof(client_addr);
 
-    server_fd = socket(AF_INET, SOCK_STREAM, 0);//default for tcp and ipv4 
+   listen_from_browser_fd  = socket(AF_INET, SOCK_STREAM, 0);//default for tcp and ipv4 
 
-    if (server_fd < 0)
+    if (listen_from_browser_fd < 0)
     {
         perror("socket");
         exit(EXIT_FAILURE);
@@ -38,22 +38,22 @@ socklen_t client_len = sizeof(client_addr);
     server_addr.sin_addr.s_addr = INADDR_ANY;
 //now binding to the socket 
     if (bind(
-            server_fd,
+           listen_from_browser_fd ,
             (struct sockaddr *)&server_addr,
-            sizeof(server_addr)) < 0) //typecastimg server_addr in to serveraddr (generic value as bind accepts)
+            sizeof(server_addr)) < 0) //typecastimg server_addr to sockaddr as bind accepts that only and server_addr is strcut sockaddr_in
     {
         perror("bind");//error function
-        close(server_fd);
+        close(listen_from_browser_fd);
         exit(EXIT_FAILURE);
     }
 
     printf("Bind successful\n");
     
    //now adding listen which basically listens to the incoming connections 
-     if (listen(server_fd, SOMAXCONN) < 0)// SOMAXCONN defines the max no. of queued tcp connections which are unaccepted a socket can hold (backlogs basciaally) kernel stores them
+     if (listen(listen_from_browser_fd , SOMAXCONN) < 0)// SOMAXCONN defines the max no. of queued tcp connections which are unaccepted a socket can hold (backlogs basciaally) kernel stores them
 {
     perror("listen");
-    close(server_fd);
+    close(listen_from_browser_fd );
     exit(EXIT_FAILURE);
 }
 
@@ -63,22 +63,22 @@ printf("Listening on port 8080...\n");
 
 printf("Waiting for connections...\n");
 
-client_fd = accept(
-    server_fd,
+browser_fd = accept(
+    listen_from_browser_fd ,
     (struct sockaddr *)&client_addr,
     &client_len //typecaast again
 );
-if (client_fd < 0)
+if (browser_fd < 0)
 {
     perror("accept");
-    close(server_fd);
+    close(listen_from_browser_fd );
     exit(EXIT_FAILURE);
 }
 
 printf("Client connected!\n");
 
 bytes_read = read(
-    client_fd,
+    browser_fd,
     buffer,
     sizeof(buffer) - 1//as we need space for /0
 );
@@ -87,8 +87,8 @@ if (bytes_read < 0)
 {
     perror("read");
 
-    close(client_fd);
-    close(server_fd);
+    close(browser_fd);
+    close(listen_from_browser_fd );
 
     exit(EXIT_FAILURE);
 }
@@ -100,6 +100,6 @@ printf("===================\n");
 
 
    
-close(client_fd);
-    close(server_fd);
+close(browser_fd);
+    close(listen_from_browser_fd );
 }
