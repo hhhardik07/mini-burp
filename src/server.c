@@ -7,7 +7,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-
+#include "client.h"
 #include "server.h" // for the start server functionn
 
 void start_server(void)
@@ -97,9 +97,48 @@ buffer[bytes_read] = '\0';
 printf("\nREQUEST \n");
 printf("%s\n", buffer);
 printf("===================\n");
+char host[256];
+char *host_header;
 
+host_header = strstr(buffer, "Host:");
 
+//extracting the hostt
+
+if (host_header == NULL)
+{
+    printf("Host header not found\n");
+
+    close(browser_fd);
+    close(listen_from_browser_fd);
+
+    return;
+}
+sscanf(
+    host_header,
+    "Host: %255s",
+    host
+);
+
+printf("Extracted Host: %s\n", host);
+
+// connect to the websitr 
+
+int target_server_fd;
+
+target_server_fd =
+    connect_to_target_server(host);
+
+if (target_server_fd < 0)
+{
+    printf("Failed to connect\n");
+
+    close(browser_fd);
+    close(listen_from_browser_fd);
+
+    return;
+}
    
 close(browser_fd);
     close(listen_from_browser_fd );
+    close(target_server_fd);
 }
