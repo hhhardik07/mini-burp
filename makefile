@@ -1,11 +1,10 @@
 CC=gcc
 
-CFLAGS=-Wall -Wextra -g -Iinclude #tells gcc where header are 
+CFLAGS=-Wall -Wextra -g -Iinclude
 
 SRC=src/main.c src/server.c
 
 TARGET=mini-burp
-
 
 all:
 	$(CC) $(CFLAGS) $(SRC) -o $(TARGET)
