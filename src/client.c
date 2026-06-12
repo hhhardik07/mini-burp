@@ -19,7 +19,7 @@ memset(&hints, 0, sizeof(hints));
 
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
-// this all is for dns resolution
+                                 // this all is for dns ressolution
     if (getaddrinfo(
             host,
             "80",
