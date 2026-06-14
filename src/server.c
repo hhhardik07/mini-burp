@@ -58,6 +58,7 @@ socklen_t client_len = sizeof(client_addr);
 }
 
 printf("Listening on port 8080...\n");
+while (1){
 
 //adding acecept which creates a new fd when a client connects 
 
@@ -71,8 +72,7 @@ browser_fd = accept(
 if (browser_fd < 0)
 {
     perror("accept");
-    close(listen_from_browser_fd );
-    exit(EXIT_FAILURE);
+    continue; // used to go back to the top of the while loop and wait for the next client
 }
 
 printf("Client connected!\n");
@@ -88,9 +88,7 @@ if (bytes_read < 0)
     perror("read");
 
     close(browser_fd);
-    close(listen_from_browser_fd );
-
-    exit(EXIT_FAILURE);
+   continue;
 }
 buffer[bytes_read] = '\0';
 
@@ -109,9 +107,7 @@ if (host_header == NULL)
     printf("Host header not found\n");
 
     close(browser_fd);
-    close(listen_from_browser_fd);
-
-    return;
+   continue;
 }
 sscanf(
     host_header,
@@ -133,15 +129,13 @@ if (target_server_fd < 0)
     printf("Failed to connect\n");
 
     close(browser_fd);
-    close(listen_from_browser_fd);
-
-    return;
+   continue;
 }
     
-    
-    
-    
-    
+        
+ 
+           
+
     
     
     // forwarding the browser requst to the website since after cpnnexipm thsi file owns bothr the browser fd and the target server fd 
@@ -159,9 +153,7 @@ if (bytes_sent < 0)
 
     close(target_server_fd);
     close(browser_fd);
-    close(listen_from_browser_fd);
-
-    return;
+   continue;
 }
 
 printf("Request forwarded\n");
@@ -178,28 +170,136 @@ while ((response_bytes =
             sizeof(response) - 1
         )) > 0)
 {
-    response[response_bytes] = '\0';
-
-    printf("%s", response);
-
-    write(
-        browser_fd,
-        response,
-        response_bytes
-    );
-}
-
-if (target_server_fd < 0)
+ while (1)
 {
-    printf("Failed to connect\n");
+    printf("\nWaiting for connections...\n");
+
+    browser_fd = accept(
+        listen_from_browser_fd,
+        (struct sockaddr *)&client_addr,
+        &client_len
+    );
+
+    if (browser_fd < 0)
+    {
+        perror("accept");
+        continue;
+    }
+
+    printf("Client connected!\n");
+
+    bytes_read = read(
+        browser_fd,
+        buffer,
+        sizeof(buffer) - 1
+    );
+
+    if (bytes_read < 0)
+    {
+        perror("read");
+
+        close(browser_fd);
+        continue;
+    }
+
+    buffer[bytes_read] = '\0';
+
+    printf("\nREQUEST\n");
+    printf("%s\n", buffer);
+    printf("===================\n");
+
+    char host[256];
+    char *host_header;
+
+    host_header = strstr(buffer, "Host:");
+
+    if (host_header == NULL)
+    {
+        printf("Host header not found\n");
+
+        close(browser_fd);
+
+        continue;
+    }
+
+    sscanf(
+        host_header,
+        "Host: %255s",
+        host
+    );
+
+    printf("Extracted Host: %s\n", host);
+
+    int target_server_fd;
+
+    target_server_fd =
+        connect_to_target_server(host);
+
+    if (target_server_fd < 0)
+    {
+        printf("Failed to connect\n");
+
+        close(browser_fd);
+
+        continue;
+    }
+
+    ssize_t bytes_sent;
+
+    bytes_sent = write(
+        target_server_fd,
+        buffer,
+        bytes_read
+    );
+
+    if (bytes_sent < 0)
+    {
+        perror("write");
+
+        close(browser_fd);
+        close(target_server_fd);
+
+        continue;
+    }
+
+    printf("Request forwarded\n");
+
+    char response[8192];
+    ssize_t response_bytes;
+
+    while (
+        (response_bytes =
+            read(
+                target_server_fd,
+                response,
+                sizeof(response)
+            )) > 0
+    )
+    {
+        ssize_t browser_bytes_sent;
+
+        browser_bytes_sent = write(
+            browser_fd,
+            response,
+            response_bytes
+        );
+
+        if (browser_bytes_sent < 0)
+        {
+            perror("write");
+            break;
+        }
+    }
+
+    if (response_bytes < 0)
+    {
+        perror("read");
+    }
 
     close(browser_fd);
-    close(listen_from_browser_fd);
-
-    return;
-}
-   
-close(browser_fd);
-    close(listen_from_browser_fd );
     close(target_server_fd);
 }
+}//ending the while loop beacsue we need to keep listening for connections not close after one
+}
+}
+
