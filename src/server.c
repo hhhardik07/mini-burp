@@ -127,6 +127,23 @@ int target_server_fd;
 
 target_server_fd =
     connect_to_target_server(host);
+    
+if (target_server_fd < 0)
+{
+    printf("Failed to connect\n");
+
+    close(browser_fd);
+    close(listen_from_browser_fd);
+
+    return;
+}
+    
+    
+    
+    
+    
+    
+    
     // forwarding the browser requst to the website since after cpnnexipm thsi file owns bothr the browser fd and the target server fd 
 ssize_t bytes_sent;
 
@@ -154,37 +171,23 @@ char response[8192];
 ssize_t response_bytes;
 
 
-response_bytes = read(
-    target_server_fd,
-    response,
-    sizeof(response) - 1
-);
-if (response_bytes < 0)
+while ((response_bytes =
+        read(
+            target_server_fd,
+            response,
+            sizeof(response) - 1
+        )) > 0)
 {
-    perror("read");
+    response[response_bytes] = '\0';
 
-    close(target_server_fd);
-    close(browser_fd);
-    close(listen_from_browser_fd);
+    printf("%s", response);
 
-    return;
+    write(
+        browser_fd,
+        response,
+        response_bytes
+    );
 }
-
-  response[response_bytes] = '\0';
-  
-  
-  
-  
-  printf("\nRESPONSE\n");
-printf("%s\n", response);
-printf(".....\n");
-
-
-write(
-    browser_fd,
-    response,
-    response_bytes
-); //
 
 if (target_server_fd < 0)
 {
